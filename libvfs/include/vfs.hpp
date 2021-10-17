@@ -22,14 +22,23 @@ namespace vfs
     public:
 
         /**
-         * @brief Enables callbacks to file observers when the file is changed 
+         * @brief Sets the Reload Mode to be used
+         * 
+         * @param newMode The mode to be used
          */
-        void enableLiveReload();
+        void setReloadMode(ReloadMode newMode);
+        
+        /**
+         * @brief Gets the current Reload Mode
+         * 
+         * @return ReloadMode The reload strategy currently in use
+         */
+        ReloadMode getReloadMode() const;
 
         /**
-         * @brief Disables callbacks to file observers when the file is changed 
+         * @brief Checks for updated files and calls their observers callbacks
          */
-        void disableLiveReload();
+        void pollForUpdatedFiles();
 
         /**
          * @brief Appends a new global bundle to the list of global bundles
@@ -100,6 +109,6 @@ namespace vfs
          * 
          * @param fileLiveReloading Enables live-reloading of disk files
          */
-        VirtualFS(bool fileLiveReloading = true);
+        VirtualFS(ReloadMode reloadMode = ReloadMode::NO_LIVE_RELOAD);
     };
 }

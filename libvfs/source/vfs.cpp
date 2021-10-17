@@ -25,14 +25,19 @@ namespace vfs
         return getFileFromDisk(fileName);
     }
 
-    void VirtualFS::enableLiveReload()
+    void VirtualFS::setReloadMode(ReloadMode newMode)
     {
-        m_diskManager.enableLiveReloading();
+        m_diskManager.setReloadMode(newMode);
     }
 
-    void VirtualFS::disableLiveReload()
+    ReloadMode VirtualFS::getReloadMode() const
     {
-        m_diskManager.disableLiveReloading();
+        return m_diskManager.getReloadMode();
+    }
+
+    void VirtualFS::pollForUpdatedFiles()
+    {
+        m_diskManager.pollForUpdatedFiles();
     }
 
     void VirtualFS::addGlobalBundle(const Bundle& bundle)
@@ -65,7 +70,7 @@ namespace vfs
         return File(m_bundleManager.getResourceFromMountedBundle(bundleName, fileName));
     }
 
-    VirtualFS::VirtualFS(bool fileLiveReloading) : m_diskManager(fileLiveReloading)
+    VirtualFS::VirtualFS(ReloadMode reloadMode) : m_diskManager(reloadMode)
     {
     }
 }

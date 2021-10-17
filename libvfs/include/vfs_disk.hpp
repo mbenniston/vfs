@@ -15,6 +15,16 @@
 namespace vfs
 {
     /**
+     * @brief Represents the different types of reload modes that the disk manager can use
+     */
+    enum class ReloadMode
+    {
+        NO_LIVE_RELOAD, // No reload callbacks to file observers
+        ASYNC_LIVE_RELOAD, // Asynchronous callbacks
+        POLL_LIVE_RELOAD // Polling triggered callbacks which requires the user to call the "pollForUpdatedFiles" method
+    };
+
+    /**
      * @brief Handles the loading and live-reloading of files retrieved from disk 
      */
     class DiskManager final
@@ -27,19 +37,31 @@ namespace vfs
 
         static constexpr std::int64_t CHANGE_CHECK_DELAY_MS = 100;
 
+        ReloadMode m_reloadMode;
+
+        void enableAsyncReload();
+        void disableAsyncReload();
+        void checkForUpdatedFiles();
+
     public:
+        /**
+         * @brief Sets the Reload Mode to be used
+         * 
+         * @param newMode The mode to be used
+         */
+        void setReloadMode(ReloadMode newMode);
         
         /**
-         * @brief Starts up live-reloading if previously disabled
+         * @brief Gets the current Reload Mode
          * 
+         * @return ReloadMode The reload strategy currently in use
          */
-        void enableLiveReloading();
+        ReloadMode getReloadMode() const;
 
         /**
-         * @brief Shuts down live-reloading if previously enabled
-         * 
+         * @brief Checks for updated files and calls their observers callbacks
          */
-        void disableLiveReloading();
+        void pollForUpdatedFiles();
 
         /**
          * @brief Get the Disk Resource object
@@ -54,7 +76,7 @@ namespace vfs
         DiskManager(DiskManager&&) = delete;
         DiskManager(const DiskManager&) = delete;
 
-        DiskManager(bool liveReloadEnabled = true);
+        DiskManager(ReloadMode reloadMode = ReloadMode::NO_LIVE_RELOAD);
         ~DiskManager();
     };
 }

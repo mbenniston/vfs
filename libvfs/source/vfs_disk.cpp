@@ -40,7 +40,29 @@ namespace vfs
         return file;
     }
 
-    void DiskManager::enableLiveReloading()
+    void DiskManager::checkForUpdatedFiles()
+    {
+        m_diskResourcesLock.lock();
+        for(auto diskFile : m_diskResources)
+        {
+            auto file = diskFile.second.lock();
+            if(file != nullptr)
+            {
+                auto lastModTime = file->getLastModifiedTime();
+                if(lastModTime) 
+                {
+                    auto newModTime = tryGetLastModTime(diskFile.first);
+                    if(newModTime && *newModTime > *lastModTime) 
+                    {
+                        file->reload();
+                    }
+                }
+            } 
+        }       
+        m_diskResourcesLock.unlock();
+    }
+
+    void DiskManager::enableAsyncReload()
     {
         if(!m_changeCheckThread.has_value())
         {
@@ -51,41 +73,47 @@ namespace vfs
                     while(!stopToken.stop_requested()) {
                         std::this_thread::sleep_for(std::chrono::milliseconds(CHANGE_CHECK_DELAY_MS));
 
-                        m_diskResourcesLock.lock();
-                        for(auto diskFile : m_diskResources)
-                        {
-                            auto file = diskFile.second.lock();
-                            if(file != nullptr)
-                            {
-                                auto lastModTime = file->getLastModifiedTime();
-                                if(lastModTime) 
-                                {
-                                    auto newModTime = tryGetLastModTime(diskFile.first);
-                                    if(newModTime && *newModTime > *lastModTime) 
-                                    {
-                                        file->reload();
-                                    }
-                                }
-                            } 
-                        }
-
-                        m_diskResourcesLock.unlock();
+                        checkForUpdatedFiles();
                     }
                 }
             );
         }
     }
 
-    void DiskManager::disableLiveReloading()
+    void DiskManager::disableAsyncReload()
     {
         m_changeCheckThread = std::nullopt;
     }
 
-    DiskManager::DiskManager(bool liveReloadEnabled)
+    void DiskManager::setReloadMode(ReloadMode newMode)
     {
-        if(liveReloadEnabled)
+        if(m_reloadMode == ReloadMode::ASYNC_LIVE_RELOAD && newMode != ReloadMode::ASYNC_LIVE_RELOAD) { 
+            disableAsyncReload();
+        } else if(m_reloadMode != ReloadMode::ASYNC_LIVE_RELOAD && newMode == ReloadMode::ASYNC_LIVE_RELOAD) { 
+            enableAsyncReload();
+        }
+
+        m_reloadMode = newMode;
+    }
+
+    ReloadMode DiskManager::getReloadMode() const
+    {
+        return m_reloadMode;
+    }
+
+    void DiskManager::pollForUpdatedFiles()
+    {
+        if(m_reloadMode == ReloadMode::POLL_LIVE_RELOAD)
         {
-            enableLiveReloading();
+            checkForUpdatedFiles();
+        }
+    }
+
+    DiskManager::DiskManager(ReloadMode mode) : m_reloadMode(mode)
+    {
+        if(mode == ReloadMode::ASYNC_LIVE_RELOAD)
+        {
+            enableAsyncReload();
         }
     }
 
