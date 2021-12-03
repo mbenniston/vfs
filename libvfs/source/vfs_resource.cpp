@@ -7,8 +7,6 @@
 
 namespace vfs
 {
-    static constexpr std::size_t READ_BUFFER_SIZE = 1024;
-    
     std::optional<TimePoint> tryGetLastModTime(const std::string& filePath)
     {
         std::error_code timeGetError;
@@ -24,7 +22,7 @@ namespace vfs
 
     std::vector<byte_t> loadDataFromDisk(const std::string& filePath)
     {
-        std::ifstream fileStream{filePath};
+        std::ifstream fileStream{filePath, std::ios::binary};
         if(!fileStream)
         {
             throw FileDoesNotExistError(filePath);
@@ -45,23 +43,11 @@ namespace vfs
             throw FileSizeError(filePath);
         }
 
-        data.reserve(
+        data.resize(
             static_cast<std::vector<unsigned char>::size_type>(fileSize));
 
         // then read the file in full
-        std::streamsize bytesRead = 0;
-        while(bytesRead != fileSize)
-        {
-            std::array<char, READ_BUFFER_SIZE> buffer;
-            std::streamsize newBytesRead = fileStream.readsome(buffer.data(), READ_BUFFER_SIZE);
-
-            if(newBytesRead > 0)
-            {
-                data.insert(data.end(), buffer.begin(), buffer.begin() + newBytesRead);
-            }
-
-            bytesRead += newBytesRead;
-        }
+        fileStream.read(reinterpret_cast<char*>(data.data()), fileSize);
 
         return data;
     }
