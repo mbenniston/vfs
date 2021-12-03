@@ -13,7 +13,8 @@ int main()
     {
         auto filePtr = fs.getFile(std::string(file.first));
         std::cout << file.first << std::endl;
-        for(vfs::byte_t b : filePtr.read().data())
+        auto handle = filePtr.read();
+        for(vfs::byte_t b : handle.data())
         {
             std::cout << static_cast<char>(b);
         }

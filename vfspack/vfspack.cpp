@@ -101,7 +101,7 @@ std::vector<std::string> unpackPath(const std::string& path)
         {
             if(!std::filesystem::is_directory(childPath))
             {
-                outputPaths.push_back(childPath.path());
+                outputPaths.push_back(childPath.path().generic_string());
             }
         }
     }

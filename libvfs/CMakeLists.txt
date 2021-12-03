@@ -16,4 +16,6 @@ target_sources(vfs PRIVATE
 target_include_directories(vfs PUBLIC include)
 
 target_link_libraries(vfs PRIVATE vfs_project_options vfs_project_warnings)
-target_link_libraries(vfs PUBLIC pthread)
+
+find_package(Threads)
+target_link_libraries(vfs PUBLIC Threads::Threads)

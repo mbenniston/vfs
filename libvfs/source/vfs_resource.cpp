@@ -2,18 +2,13 @@
 
 #include <fstream>
 #include <iostream>
+#include <chrono>
+#include <array>
 
 namespace vfs
 {
     static constexpr std::size_t READ_BUFFER_SIZE = 1024;
-
-    void printLastWriteTime(const TimePoint& ftime)
-    {
-        std::time_t cftime = std::chrono::system_clock::to_time_t(
-            std::chrono::file_clock::to_sys(ftime));
-        std::cout << "File write time is " << std::asctime(std::localtime(&cftime));
-    }
-
+    
     std::optional<TimePoint> tryGetLastModTime(const std::string& filePath)
     {
         std::error_code timeGetError;

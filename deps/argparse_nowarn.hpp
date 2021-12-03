@@ -1,6 +1,6 @@
 #pragma once
 
-#ifndef _MSVC
+#ifndef _MSC_VER 
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wshadow"
 #pragma GCC diagnostic ignored "-Wsign-conversion"
@@ -10,7 +10,7 @@
 
 #include "argparse.hpp"
 
-#ifndef _MSVC
+#ifndef _MSC_VER 
 #pragma GCC diagnostic pop
 #else
 #pragma warning( pop )

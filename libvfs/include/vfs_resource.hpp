@@ -22,13 +22,6 @@ namespace vfs
     using TimePoint = std::filesystem::file_time_type;
     
     /**
-     * @brief Helper function for printing a file time 
-     * 
-     * @param ftime The file time to be printed
-     */
-    void printLastWriteTime(const TimePoint& ftime);
-
-    /**
      * @brief Attempts to return the last time a file was edited on disk
      * Will return std::nullopt if the file doesn't exist or if an error occurs when getting the time.
      * @param filePath The path to the file
